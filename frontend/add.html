@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeadlineOrbit - Add Mission</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>DeadlineOrbit</h1>
+    <div class="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="add.html" style="background: #00e5ff; color: #050811;">+ Add Deadline</a>
+    </div>
+    <div class="form-box">
+      <h2>Add New Mission</h2>
+      <form id="add-deadline-form">
+        <div class="form-group">
+          <label for="title">Mission Title</label>
+          <input type="text" id="title" placeholder="What needs to be done?" required>
+        </div>
+        <div class="form-group">
+          <label for="dueDate">Due Date & Time</label>
+          <input type="datetime-local" id="dueDate" required>
+        </div>
+        <div class="form-group">
+          <label for="priority">Priority Level</label>
+          <select id="priority">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-submit">Launch Mission</button>
+      </form>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    window.onload = function() {
+        const formElement = document.getElementById('add-deadline-form');
+        formElement.onsubmit = function(event) {
+            event.preventDefault();
+            const titleValue = document.getElementById('title').value;
+            const dateValue = document.getElementById('dueDate').value;
+            const priorityValue = document.getElementById('priority').value;
+            saveNewDeadline(titleValue, dateValue, priorityValue);
+        };
+    };
+  </script>
+</body>
+</html>

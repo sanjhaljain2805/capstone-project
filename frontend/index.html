@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeadlineOrbit-Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>DeadlineOrbit</h1>
+    <div class="nav">
+      <a href="index.html">Dashboard</a>
+      <a href="add.html">+ Add Deadline</a>
+    </div>
+    <h2>Current Missions</h2>
+    <div id="deadline-list">
+      <p style="text-align: center; color: #a0aab2;">Scanning for deadlines...</p>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    window.onload = function () {
+      askForNotificationPermission();
+      loadAllDeadlines();
+    };
+  </script>
+</body>
+
+</html>
