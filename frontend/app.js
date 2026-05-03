@@ -1,4 +1,9 @@
-const API_BASE_URL = '/api/deadlines';
+const API_BASE_URL = (function() {
+    if (window.location.protocol === 'file:' || window.location.origin === 'null') {
+        return 'http://localhost:3000/api/deadlines';
+    }
+    return window.location.origin + '/api/deadlines';
+})();
 
 function askForNotificationPermission() {
     if ('Notification' in window) {
@@ -73,10 +78,12 @@ function saveNewDeadline(title, date, priority) {
         if (response.ok === true) {
             window.location.href = 'index.html';
         } else {
+            console.error('Save deadline failed with status', response.status, response.statusText);
             alert('Failed to save deadline');
         }
     })
     .catch(function(error) {
+        console.error('Network error while saving deadline:', error);
         alert('Network error while saving');
     });
 }
@@ -131,10 +138,12 @@ function saveEditedDeadline(title, date, priority) {
         if (response.ok === true) {
             window.location.href = 'index.html';
         } else {
+            console.error('Update deadline failed with status', response.status, response.statusText);
             alert('Failed to update deadline');
         }
     })
     .catch(function(error) {
+        console.error('Network error while updating deadline:', error);
         alert('Network error while updating');
     });
 }
