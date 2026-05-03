@@ -2,36 +2,48 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const os = require('os');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_FILE = path.join(__dirname, 'deadlines.json');
+const DATA_DIR = process.env.DATA_DIR || os.tmpdir();
+const DATA_FILE = path.join(DATA_DIR, 'deadlines.json');
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
 
 function readDeadlinesFromFile() {
-    if (!fs.existsSync(DATA_FILE)) {
-        fs.writeFileSync(DATA_FILE, JSON.stringify([]));
-    }
-    const fileContent = fs.readFileSync(DATA_FILE, 'utf8');
-    if (!fileContent || fileContent.trim() === '') {
-        return [];
-    }
     try {
-        return JSON.parse(fileContent);
+        if (!fs.existsSync(DATA_FILE)) {
+            fs.writeFileSync(DATA_FILE, JSON.stringify([]));
+            return [];
+        }
+        const fileContent = fs.readFileSync(DATA_FILE, 'utf8');
+        if (!fileContent || fileContent.trim() === '') {
+            return [];
+        }
+        try {
+            return JSON.parse(fileContent);
+        } catch (error) {
+            console.error('JSON Parse Error:', error);
+            return [];
+        }
     } catch (error) {
-        console.error('JSON Parse Error:', error);
+        console.error('Error reading deadlines file:', error);
         return [];
     }
 }
 
 function writeDeadlinesToFile(deadlineList) {
     const textContent = JSON.stringify(deadlineList, null, 2);
-    fs.writeFileSync(DATA_FILE, textContent);
+    try {
+        fs.writeFileSync(DATA_FILE, textContent);
+    } catch (error) {
+        console.error('Error writing deadlines file:', error);
+        throw error;
+    }
 }
 
 app.get('/api/deadlines', function(request, response) {
@@ -47,23 +59,33 @@ app.post('/api/deadlines', function(request, response) {
         dueDate: request.body.dueDate || new Date().toISOString(),
         priority: request.body.priority || 'Medium'
     };
-    const deadlineList = readDeadlinesFromFile();
-    deadlineList.push(newDeadline);
-    writeDeadlinesToFile(deadlineList);
-    response.status(201).json(newDeadline);
+    try {
+        const deadlineList = readDeadlinesFromFile();
+        deadlineList.push(newDeadline);
+        writeDeadlinesToFile(deadlineList);
+        response.status(201).json(newDeadline);
+    } catch (error) {
+        console.error('Failed to save new deadline:', error);
+        response.status(500).json({ message: 'Unable to save deadline' });
+    }
 });
 
 app.delete('/api/deadlines/:id', function(request, response) {
     const deadlineId = request.params.id;
-    const deadlineList = readDeadlinesFromFile();
-    const newList = [];
-    for (let i = 0; i < deadlineList.length; i++) {
-        if (deadlineList[i].id !== deadlineId) {
-            newList.push(deadlineList[i]);
+    try {
+        const deadlineList = readDeadlinesFromFile();
+        const newList = [];
+        for (let i = 0; i < deadlineList.length; i++) {
+            if (deadlineList[i].id !== deadlineId) {
+                newList.push(deadlineList[i]);
+            }
         }
+        writeDeadlinesToFile(newList);
+        response.json({ message: 'Deleted' });
+    } catch (error) {
+        console.error('Failed to delete deadline:', error);
+        response.status(500).json({ message: 'Unable to delete deadline' });
     }
-    writeDeadlinesToFile(newList);
-    response.json({ message: 'Deleted' });
 });
 
 app.put('/api/deadlines/:id', function(request, response) {
