@@ -87,6 +87,10 @@ app.put('/api/deadlines/:id', function(request, response) {
     }
 });
 
-app.listen(PORT, function() {
-    console.log('Server running on http://localhost:' + PORT);
-});
+if (require.main === module) {
+    app.listen(PORT, function() {
+        console.log('Server running on http://localhost:' + PORT);
+    });
+}
+
+module.exports = app;
